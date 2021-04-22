@@ -1,0 +1,49 @@
+require 'aws-sdk'
+require 'json'
+
+awsregion = "us-east-2"
+ses = Aws::SES::Client.new(region:awsregion)
+
+sender = '<sender'sEmail'
+recipient = 'recipient'sEmail'
+
+contactFormInfo = JSON.parse(event.body)
+contactFormName = contactFormInfo.senderName
+contactFormEmail = contactFormInfo.senderEmail
+contactFormMessage = contactFormInfo.message
+
+begin
+    resp = ses.send_email({
+        destination: {
+            to_addresses:[
+                recipient
+            ]
+        },
+        message:{
+            body: {
+                text: {
+                    data: {
+                        'You just got a message from #{contactFormName} - #{contactFormEmail}:
+            #{contactFormMessage}'
+                        
+                    }
+                }
+            }
+            subject:{
+                data:{
+                    '#{contactFormName} is trying to get in touch with you'
+                }
+            }
+        },
+        source: sender
+    })
+rescue Exception => e
+    puts e.message
+    puts e.backtrace.inspect
+else
+    # other exception
+ensure
+    # always executed
+end
+
+
